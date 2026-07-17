@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LOOP · Demo Smart Fit</title>
+<style>
+  :root{
+    --yellow:#FFD200;
+    --yellow-dim:#B99A00;
+    --black:#0B0B0C;
+    --surface:#151517;
+    --card:#1E1E22;
+    --card2:#26262B;
+    --line:#2E2E34;
+    --text:#F6F6F2;
+    --muted:#9B9BA3;
+    --green:#35D07F;
+    --amber:#FFB02E;
+    --red:#FF5A5A;
+    --blue:#4DA3FF;
+    --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:#000;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    color:var(--text);
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;
+    background:radial-gradient(1200px 800px at 70% -10%, #1c1c14 0%, #000 55%);
+  }
+  /* ---------- PHONE FRAME ---------- */
+  .phone{
+    position:relative;
+    width:min(400px,100vw);
+    height:min(860px,100vh);
+    background:var(--black);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  @media(min-width:480px){
+    .phone{
+      border-radius:44px;
+      border:6px solid #222;
+      box-shadow:0 30px 80px rgba(0,0,0,.7), 0 0 0 1px #333;
+      height:min(844px,94vh);
+    }
+  }
+  /* ---------- SCREENS ---------- */
+  .screen{
+    position:absolute;inset:0;
+    display:none;flex-direction:column;
+    background:var(--black);
+    animation:fadein .22s ease;
+  }
+  .screen.active{display:flex}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .scroll{flex:1;overflow-y:auto;padding:18px 18px 110px;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  /* ---------- HEADER ---------- */
+  .hdr{
+    padding:20px 18px 14px;
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--black);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:baseline;gap:8px}
+  .brand .loop{
+    font-weight:900;font-size:22px;letter-spacing:.04em;color:var(--yellow);
+  }
+  .brand .loop::after{content:".";color:var(--text)}
+  .brand .sf{
+    font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
+  }
+  .hdr .who{
+    font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;
+    display:flex;align-items:center;gap:6px;
+  }
+  .hdr .who .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+
+  h1{font-size:26px;font-weight:900;letter-spacing:-.01em;line-height:1.15}
+  h2{font-size:18px;font-weight:800;margin-bottom:4px}
+  .eyebrow{
+    font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow);
+    margin-bottom:8px;
+  }
+  .sub{color:var(--muted);font-size:14px;line-height:1.5}
+  .mt8{margin-top:8px}.mt14{margin-top:14px}.mt20{margin-top:20px}.mt28{margin-top:28px}
+
+  /* ---------- CARDS & BUTTONS ---------- */
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;
+  }
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;padding:16px;border:none;border-radius:16px;
+    font-size:16px;font-weight:800;cursor:pointer;
+    font-family:inherit;letter-spacing:.01em;
+    transition:transform .08s ease;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-y{background:var(--yellow);color:#111}
+  .btn-ghost{background:transparent;color:var(--yellow);border:1.5px solid var(--yellow)}
+  .btn-dark{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+  .btn-sm{padding:10px 14px;width:auto;font-size:13px;border-radius:12px}
+
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:700;color:var(--muted);
+    background:var(--card2);border:1px solid var(--line);
+    padding:5px 10px;border-radius:999px;
+  }
+  .chip .cdot{width:8px;height:8px;border-radius:50%}
+  .cdot.g{background:var(--green)}.cdot.a{background:var(--amber)}.cdot.k{background:#777}
+
+  /* ---------- TABBAR ---------- */
+  .tabbar{
+    position:absolute;bottom:0;left:0;right:0;
+    display:flex;background:rgba(11,11,12,.92);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    padding:10px 8px calc(14px + env(safe-area-inset-bottom));
+    z-index:5;
+  }
+  .tab{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:none;border:none;color:var(--muted);cursor:pointer;font-family:inherit;
+    font-size:10.5px;font-weight:700;letter-spacing:.04em;
+  }
+  .tab .ico{font-size:20px;line-height:1}
+  .tab.on{color:var(--yellow)}
+  .tab .badge{
+    position:absolute;transform:translate(14px,-4px);
+    background:var(--red);color:#fff;font-size:9px;font-weight:800;
+    min-width:16px;height:16px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;padding:0 4px;
+  }
+
+  /* ---------- SPLASH ---------- */
+  #s-splash{justify-content:space-between;padding:0}
+  .splash-top{padding:70px 26px 0}
+  .splash-logo{font-size:64px;font-weight:900;letter-spacing:-.02em;color:var(--yellow);line-height:1}
+  .splash-logo span{color:var(--text)}
+  .splash-bars{display:flex;gap:6px;margin:26px 0 18px}
+  .splash-bars i{display:block;width:34px;height:6px;background:var(--yellow);border-radius:3px}
+  .splash-bars i:nth-child(2){opacity:.55}.splash-bars i:nth-child(3){opacity:.25}
+  .splash-bottom{padding:0 22px 40px}
+
+  /* ---------- CHECK-IN ---------- */
+  .qr{
+    width:190px;height:190px;margin:26px auto 8px;position:relative;
+    background:var(--card);border:1px solid var(--line);border-radius:22px;
+    display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);
+    gap:3px;padding:18px;overflow:hidden;
+  }
+  .qr i{background:#3a3a40;border-radius:2px}
+  .qr i.on{background:var(--yellow)}
+  .qr .scanline{
+    position:absolute;left:0;right:0;height:3px;background:var(--yellow);
+    box-shadow:0 0 18px 4px rgba(255,210,0,.5);border-radius:2px;
+    animation:scan 1.8s ease-in-out infinite;
+  }
+  @keyframes scan{0%,100%{top:12%}50%{top:86%}}
+
+  /* ---------- MOOD ---------- */
+  .moods{display:flex;flex-direction:column;gap:12px;margin-top:22px}
+  .mood{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);
+    padding:16px;cursor:pointer;font-family:inherit;color:var(--text);text-align:left;
+    transition:border-color .15s, transform .08s;
+  }
+  .mood:active{transform:scale(.98)}
+  .mood .em{font-size:32px}
+  .mood b{display:block;font-size:16px}
+  .mood small{color:var(--muted);font-size:12.5px}
+
+  /* ---------- STREAK RING ---------- */
+  .streak{display:flex;align-items:center;gap:16px}
+  .ring{position:relative;width:74px;height:74px;flex:none}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .num{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-weight:900;font-size:17px;
+  }
+  .ring .num small{font-size:8.5px;color:var(--muted);font-weight:700;letter-spacing:.06em}
+
+  /* ---------- SESSION OPTIONS ---------- */
+  .sess{
+    position:relative;
+    display:block;width:100%;text-align:left;font-family:inherit;color:var(--text);
+    background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);
+    padding:16px;cursor:pointer;margin-top:12px;transition:transform .08s;
+  }
+  .sess:active{transform:scale(.98)}
+  .sess.reco{border-color:var(--yellow);background:linear-gradient(180deg,#26240f, var(--card))}
+  .sess .tag{
+    position:absolute;top:-9px;left:14px;background:var(--yellow);color:#111;
+    font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+    padding:3px 8px;border-radius:6px;
+  }
+  .sess h3{font-size:17px;font-weight:800}
+  .sess .meta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+
+  /* ---------- EXERCISE / "GIF" ---------- */
+  .exo{margin-top:14px;overflow:hidden}
+  .exo .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .exo h3{font-size:16px;font-weight:800}
+  .exo .easy{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .gifbox{
+    margin-top:12px;background:#111114;border:1px solid var(--line);border-radius:14px;
+    height:150px;display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .gifbox .giftag{
+    position:absolute;top:8px;left:8px;font-size:9px;font-weight:800;letter-spacing:.1em;
+    color:#111;background:var(--yellow);padding:3px 6px;border-radius:5px;text-transform:uppercase;
+  }
+  /* 2-frame "gif": frames alternate with steps() */
+  .anim{position:relative;width:150px;height:130px}
+  .anim .f{position:absolute;inset:0;opacity:0}
+  .anim .f1{animation:fA 1.2s steps(1) infinite}
+  .anim .f2{animation:fB 1.2s steps(1) infinite}
+  @keyframes fA{0%{opacity:1}50%{opacity:0}100%{opacity:1}}
+  @keyframes fB{0%{opacity:0}50%{opacity:1}100%{opacity:0}}
+  .stick{stroke:var(--yellow);stroke-width:5;stroke-linecap:round;fill:none}
+  .stick-head{fill:var(--yellow);stroke:none}
+  .stick-eq{stroke:#8a8a92;stroke-width:5;stroke-linecap:round;fill:none}
+  .exo .doneline{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:10px}
+  .exo.checked{border-color:var(--green)}
+  .exo.checked .btn-done{background:var(--green);color:#06170e}
+  .btn-done{flex:1;background:var(--card2);color:var(--text);border:1px solid var(--line);
+    padding:12px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit}
+
+  .progress{height:8px;background:var(--card2);border-radius:6px;overflow:hidden;margin-top:12px}
+  .progress i{display:block;height:100%;background:var(--yellow);border-radius:6px;transition:width .35s ease}
+
+  .callcoach{
+    position:absolute;left:16px;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:6;
+  }
+
+  /* ---------- COACH ---------- */
+  .entry{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:13px 14px;margin-top:10px;cursor:pointer;transition:transform .08s;
+  }
+  .entry:active{transform:scale(.98)}
+  .entry .lvl{width:12px;height:12px;border-radius:50%;flex:none}
+  .lvl.g{background:var(--green);box-shadow:0 0 0 4px rgba(53,208,127,.15)}
+  .lvl.a{background:var(--amber);box-shadow:0 0 0 4px rgba(255,176,46,.15)}
+  .lvl.k{background:#888;box-shadow:0 0 0 4px rgba(136,136,136,.15)}
+  .entry .nm{flex:1;min-width:0}
+  .entry .nm b{font-size:15px;display:flex;align-items:center;gap:6px}
+  .entry .nm small{color:var(--muted);font-size:12px;display:block;margin-top:2px}
+  .entry .mood-em{font-size:22px}
+  .entry .tm{font-size:11px;color:var(--muted);font-weight:700;flex:none}
+  .entry.live{border-color:var(--yellow);animation:pop .4s ease}
+  .pulse{
+    display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--yellow);
+    animation:pulse 1.2s ease infinite;
+  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,210,0,.6)}100%{box-shadow:0 0 0 9px rgba(255,210,0,0)}}
+  @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+
+  .alertc{border-left:none;margin-top:10px}
+  .alertc.urgent{border-color:var(--red);background:linear-gradient(180deg,#2a1414,var(--card))}
+  .alertc .row{display:flex;align-items:center;gap:10px}
+  .alertc .em{font-size:26px}
+  .alertc b{font-size:15px}
+  .alertc small{color:var(--muted);font-size:12px;display:block;margin-top:2px}
+
+  .kv{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .kv:last-child{border:none}
+  .kv span{color:var(--muted)}
+  .kv b{text-align:right;max-width:60%}
+
+  /* ---------- RACHA (calendar) ---------- */
+  .weekrow{display:flex;align-items:center;gap:8px;margin-top:12px}
+  .weekrow .wl{width:64px;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.04em}
+  .weekrow .days{display:flex;gap:7px;flex:1}
+  .day{
+    width:26px;height:26px;border-radius:8px;background:var(--card2);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:12px;
+  }
+  .day.v{background:var(--yellow);border-color:var(--yellow);color:#111;font-weight:900}
+  .day.short{background:var(--yellow-dim);border-color:var(--yellow-dim);color:#111;font-weight:900}
+
+  /* ---------- MODALS / TOAST ---------- */
+  .modal-bg{
+    position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:20;
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .modal-bg.show{display:flex}
+  .modal{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:24px 24px 0 0;padding:24px 20px calc(28px + env(safe-area-inset-bottom));
+    width:100%;animation:up .25s ease;
+  }
+  @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .toast{
+    position:absolute;top:18px;left:16px;right:16px;z-index:30;
+    background:var(--card2);border:1px solid var(--yellow);border-radius:14px;
+    padding:12px 14px;font-size:13.5px;font-weight:600;
+    display:flex;align-items:center;gap:10px;
+    transform:translateY(-90px);opacity:0;transition:all .3s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+  .toast.show{transform:none;opacity:1}
+
+  /* ---------- ROLE SWITCH (demo control) ---------- */
+  .roleswitch{
+    position:absolute;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+    z-index:40;display:flex;background:rgba(30,30,34,.9);backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;
+  }
+  .roleswitch button{
+    position:relative;
+    border:none;background:transparent;color:var(--muted);font-family:inherit;
+    font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:7px 14px;border-radius:999px;cursor:pointer;
+  }
+  .roleswitch button.on{background:var(--yellow);color:#111}
+  .roleswitch .rbadge{
+    position:absolute;top:-4px;right:-2px;background:var(--red);color:#fff;
+    font-size:9px;font-weight:800;min-width:15px;height:15px;border-radius:8px;
+    display:none;align-items:center;justify-content:center;padding:0 4px;
+  }
+  .roleswitch .rbadge.show{display:flex}
+
+  /* ---------- CONFETTI ---------- */
+  .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .confetti i{
+    position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;
+    animation:fall 2.6s linear infinite;
+  }
+  @keyframes fall{
+    0%{transform:translateY(-20px) rotate(0)}
+    100%{transform:translateY(900px) rotate(540deg)}
+  }
+  .bigcheck{
+    width:92px;height:92px;border-radius:50%;background:var(--yellow);margin:30px auto 0;
+    display:flex;align-items:center;justify-content:center;font-size:44px;color:#111;
+    animation:pop .5s cubic-bezier(.2,1.4,.4,1);
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important}
+  }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- demo role switch -->
+  <div class="roleswitch">
+    <button id="rs-user" class="on" onclick="setRole('user')">🏋️ Socio</button>
+    <button id="rs-coach" onclick="setRole('coach')">📋 Coach
+      <span class="rbadge" id="coach-badge">1</span>
+    </button>
+  </div>
+
+  <!-- ============ SOCIO: SPLASH ============ -->
+  <section class="screen active" id="s-splash">
+    <div class="splash-top">
+      <div class="brand"><span class="sf">Smart Fit</span></div>
+      <div class="splash-logo mt20">LOOP<span>.</span></div>
+      <div class="splash-bars"><i></i><i></i><i></i></div>
+      <h1>Tu gymbro,<br>dentro de tu app.</h1>
+      <p class="sub mt14">Un módulo nuevo en la app Smart Fit que te acompaña desde que cruzas el torniquete. Sin videos, sin internet, sin pena.</p>
+    </div>
+    <div class="splash-bottom">
+      <button class="btn btn-y" onclick="go('s-checkin')">Entrar al gimnasio →</button>
+      <p class="sub mt14" style="text-align:center;font-size:12px">Demo · Hackathon Smart Fit 2026</p>
+    </div>
+  </section>
+
+  <!-- ============ SOCIO: CHECK-IN ============ -->
+  <section class="screen" id="s-checkin">
+    <div class="scroll" style="padding-top:70px">
+      <p class="eyebrow">Paso 1 · Check-in</p>
+      <h1>Acerca tu teléfono al torniquete</h1>
+      <div class="qr" id="qr"><div class="scanline"></div></div>
+      <p class="sub" style="text-align:center">Tu acceso de siempre. Cero hardware nuevo:<br>el torniquete ya existe.</p>
+      <div class="card mt20">
+        <p class="sub" style="font-size:13px">💡 Al pasar, LOOP le avisa a tu coach que llegaste — con tu nivel y tu ánimo — para que sepa cómo recibirte. Tú no haces nada extra.</p>
+      </div>
+      <button class="btn btn-y mt20" onclick="checkin()">Simular acceso ✓</button>
+    </div>
+  </section>
+
+  <!-- ============ SOCIO: MOOD ============ -->
+  <section class="screen" id="s-mood">
+    <div class="scroll" style="padding-top:70px">
+      <p class="eyebrow">Paso 2 · Check-in emocional</p>
+      <h1>Hola, Valeria 👋<br>¿Cómo llegas hoy?</h1>
+      <p class="sub mt8">Esto ajusta tu sesión de hoy. Solo lo ve tu coach, nadie más.</p>
+      <div class="moods">
+        <button class="mood" onclick="setMood('low')">
+          <span class="em">😮‍💨</span>
+          <span><b>Con pilas bajas</b><small>Día pesado. Vengo porque quiero cumplir.</small></span>
+        </button>
+        <button class="mood" onclick="setMood('ok')">
+          <span class="em">🙂</span>
+          <span><b>Normal</b><small>Aquí ando, lista para entrenar.</small></span>
+        </button>
+        <button class="mood" onclick="setMood('fire')">
+          <span class="em">🔥</span>
+          <span><b>¡A tope!</b><small>Hoy sí traigo toda la energía.</small></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SOCIO: HOME ============ -->
+  <section class="screen" id="s-home">
+    <div class="hdr" style="padding-top:56px">
+      <div class="brand"><span class="loop">LOOP</span><span class="sf">Smart Fit</span></div>
+      <div class="who"><span class="dot"></span>Valeria</div>
+    </div>
+    <div class="scroll">
+      <h2 id="home-greet">Hoy toca: fuerza básica + cardio suave</h2>
+      <p class="sub" id="home-note">De tu plan base semanal. Tú eliges cuánto.</p>
+
+      <div class="card mt14 streak">
+        <div class="ring">
+          <svg width="74" height="74" viewBox="0 0 74 74">
+            <circle cx="37" cy="37" r="31" stroke="#2E2E34" stroke-width="7" fill="none"/>
+            <circle cx="37" cy="37" r="31" stroke="#FFD200" stroke-width="7" fill="none"
+              stroke-linecap="round" stroke-dasharray="195" stroke-dashoffset="65"/>
+          </svg>
+          <div class="num">2/3<small>SEMANA</small></div>
+        </div>
+        <div>
+          <b style="font-size:15px">Racha viva: 4 semanas 🔥</b>
+          <p class="sub" style="font-size:12.5px;margin-top:4px">Con 3 visitas a la semana la mantienes. Hoy sería la #3. Venir ya cuenta — corta o completa.</p>
+        </div>
+      </div>
+
+      <p class="eyebrow mt28">Tu sesión de hoy</p>
+      <div id="sess-box">
+        <button class="sess reco" id="sess-short" onclick="startWorkout('short')">
+          <span class="tag" id="sess-short-tag">Sugerida hoy</span>
+          <h3>Sesión corta · 20 min</h3>
+          <p class="sub mt8" id="sess-short-sub">Lo esencial de hoy en 3 ejercicios. Perfecta para no romper la racha.</p>
+          <div class="meta"><span class="chip">🏋️ 2 de fuerza</span><span class="chip">🚶 1 de cardio</span></div>
+        </button>
+        <button class="sess" id="sess-full" onclick="startWorkout('full')">
+          <h3>Sesión completa · 40 min</h3>
+          <p class="sub mt8">El plan del día completo: fuerza básica + cardio suave + estiramiento.</p>
+          <div class="meta"><span class="chip">🏋️ 3 de fuerza</span><span class="chip">🚶 1 de cardio</span><span class="chip">🧘 1 de cierre</span></div>
+        </button>
+      </div>
+
+      <div class="card mt20" style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:28px">🧢</span>
+        <div style="flex:1">
+          <b style="font-size:14px">Tu coach de hoy: María</b>
+          <p class="sub" style="font-size:12px">Zona funcional · Ya sabe que llegaste</p>
+        </div>
+      </div>
+    </div>
+    <nav class="tabbar">
+      <button class="tab on" onclick="userTab('s-home',this)"><span class="ico">🏠</span>Hoy</button>
+      <button class="tab" onclick="userTab('s-racha',this)"><span class="ico">📆</span>Constancia</button>
+      <button class="tab" onclick="userTab('s-perfil',this)"><span class="ico">👤</span>Mi plan</button>
+    </nav>
+  </section>
+
+  <!-- ============ SOCIO: RACHA ============ -->
+  <section class="screen" id="s-racha">
+    <div class="hdr" style="padding-top:56px">
+      <div class="brand"><span class="loop">LOOP</span><span class="sf">Smart Fit</span></div>
+      <div class="who">Constancia</div>
+    </div>
+    <div class="scroll">
+      <h2>Medimos constancia,<br>no perfección.</h2>
+      <p class="sub mt8">Tu racha es semanal: 3 visitas la mantienen. Una sesión corta vale igual que una completa. Un mal día no la rompe.</p>
+      <div class="card mt20">
+        <div class="weekrow"><span class="wl">HACE 3 SEM</span><div class="days"><i class="day v">✓</i><i class="day"></i><i class="day v">✓</i><i class="day"></i><i class="day short">✓</i><i class="day"></i><i class="day"></i></div></div>
+        <div class="weekrow"><span class="wl">HACE 2 SEM</span><div class="days"><i class="day"></i><i class="day v">✓</i><i class="day"></i><i class="day short">✓</i><i class="day"></i><i class="day v">✓</i><i class="day"></i></div></div>
+        <div class="weekrow"><span class="wl">SEM PASADA</span><div class="days"><i class="day v">✓</i><i class="day"></i><i class="day short">✓</i><i class="day"></i><i class="day v">✓</i><i class="day"></i><i class="day"></i></div></div>
+        <div class="weekrow"><span class="wl">ESTA SEM</span><div class="days"><i class="day v">✓</i><i class="day"></i><i class="day v">✓</i><i class="day" id="today-dot" style="border-color:var(--yellow)"></i><i class="day"></i><i class="day"></i><i class="day"></i></div></div>
+        <div class="mt14" style="display:flex;gap:10px;flex-wrap:wrap">
+          <span class="chip"><span class="cdot" style="background:var(--yellow)"></span>Sesión completa</span>
+          <span class="chip"><span class="cdot" style="background:var(--yellow-dim)"></span>Sesión corta</span>
+        </div>
+      </div>
+      <div class="card mt14">
+        <div class="kv"><span>Racha actual</span><b>4 semanas 🔥</b></div>
+        <div class="kv"><span>Visitas este mes</span><b>11</b></div>
+        <div class="kv"><span>Tu mejor racha</span><b>4 semanas (¡ahora!)</b></div>
+      </div>
+    </div>
+    <nav class="tabbar">
+      <button class="tab" onclick="userTab('s-home',this)"><span class="ico">🏠</span>Hoy</button>
+      <button class="tab on" onclick="userTab('s-racha',this)"><span class="ico">📆</span>Constancia</button>
+      <button class="tab" onclick="userTab('s-perfil',this)"><span class="ico">👤</span>Mi plan</button>
+    </nav>
+  </section>
+
+  <!-- ============ SOCIO: PERFIL / PLAN ============ -->
+  <section class="screen" id="s-perfil">
+    <div class="hdr" style="padding-top:56px">
+      <div class="brand"><span class="loop">LOOP</span><span class="sf">Smart Fit</span></div>
+      <div class="who">Mi plan</div>
+    </div>
+    <div class="scroll">
+      <div class="card" style="display:flex;align-items:center;gap:14px">
+        <div style="width:54px;height:54px;border-radius:50%;background:var(--yellow);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#111">V</div>
+        <div>
+          <b style="font-size:17px">Valeria, 27</b>
+          <div class="mt8"><span class="chip"><span class="cdot g"></span>Principiante</span></div>
+        </div>
+      </div>
+      <p class="sub mt8" style="font-size:12px">Tu nivel solo lo ve tu coach, para saber cómo apoyarte. Nunca aparece en público.</p>
+
+      <p class="eyebrow mt28">Mi objetivo</p>
+      <div class="card">
+        <b style="font-size:15px">Bajar de peso y ganar energía 🎯</b>
+        <p class="sub mt8" style="font-size:13px">Definido en tu inscripción (recomendación médica: menos sedentarismo, menos estrés). Tu plan sale de aquí.</p>
+      </div>
+
+      <p class="eyebrow mt28">Mi base semanal</p>
+      <div class="card">
+        <div class="kv"><span>2× por semana</span><b>Fuerza básica (no perder músculo)</b></div>
+        <div class="kv"><span>1× por semana</span><b>Cardio suave · zona 2</b></div>
+        <div class="kv"><span>1× por semana</span><b>Caminata inclinada + movilidad</b></div>
+      </div>
+      <p class="sub mt8" style="font-size:12px">La base se adapta cada semana según tu constancia y tu ánimo. Si tu objetivo fuera una media maratón, tu base sería otra: core, tren inferior, HIIT y zona 2.</p>
+    </div>
+    <nav class="tabbar">
+      <button class="tab" onclick="userTab('s-home',this)"><span class="ico">🏠</span>Hoy</button>
+      <button class="tab" onclick="userTab('s-racha',this)"><span class="ico">📆</span>Constancia</button>
+      <button class="tab on" onclick="userTab('s-perfil',this)"><span class="ico">👤</span>Mi plan</button>
+    </nav>
+  </section>
+
+  <!-- ============ SOCIO: WORKOUT ============ -->
+  <section class="screen" id="s-workout">
+    <div class="hdr" style="padding-top:56px">
+      <div>
+        <b id="wo-title" style="font-size:17px;font-weight:900">Sesión corta · 20 min</b>
+        <div class="progress" style="width:180px"><i id="wo-bar" style="width:0%"></i></div>
+      </div>
+      <button class="btn btn-dark btn-sm" onclick="go('s-home')">Salir</button>
+    </div>
+    <div class="scroll" id="wo-list" style="padding-bottom:170px"></div>
+    <div class="callcoach">
+      <button class="btn btn-ghost" onclick="callCoach()" style="background:rgba(11,11,12,.9);backdrop-filter:blur(8px)">🖐 Llamar a mi coach</button>
+    </div>
+  </section>
+
+  <!-- ============ SOCIO: DONE ============ -->
+  <section class="screen" id="s-done">
+    <div class="confetti" id="confetti"></div>
+    <div class="scroll" style="padding-top:60px;text-align:center">
+      <div class="bigcheck">✓</div>
+      <h1 class="mt20">¡Viniste. Eso es<br>lo que cuenta! 🎉</h1>
+      <p class="sub mt8" id="done-sub">Visita #3 de la semana: tu racha de 4 semanas sigue viva.</p>
+      <div class="card mt28" style="text-align:left">
+        <p class="eyebrow">Kudo de tu coach</p>
+        <div style="display:flex;gap:12px;align-items:center">
+          <span style="font-size:30px">👏</span>
+          <div>
+            <b style="font-size:14px">María te mandó un kudo</b>
+            <p class="sub" style="font-size:13px">"¡Qué bien verte hoy, Valeria! Gran técnica en la sentadilla."</p>
+          </div>
+        </div>
+      </div>
+      <div class="card mt14" style="text-align:left">
+        <div class="kv"><span>Racha semanal</span><b>4 semanas 🔥</b></div>
+        <div class="kv"><span>Ejercicios de hoy</span><b id="done-count">3 de 3</b></div>
+        <div class="kv"><span>Próxima meta</span><b>5 semanas seguidas 🏅</b></div>
+      </div>
+      <button class="btn btn-y mt20" onclick="finishDay()">Listo, nos vemos pronto</button>
+    </div>
+  </section>
+
+  <!-- ============ COACH: PISO ============ -->
+  <section class="screen" id="c-dash">
+    <div class="hdr" style="padding-top:56px">
+      <div class="brand"><span class="loop">LOOP</span><span class="sf">Modo Coach</span></div>
+      <div class="who"><span class="dot"></span>María</div>
+    </div>
+    <div class="scroll">
+      <h2>En el piso ahora: <span id="floor-count" style="color:var(--yellow)">3</span></h2>
+      <p class="sub">Ordenados por quién más te necesita, no por quién llegó primero.</p>
+      <div class="mt14" style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="chip"><span class="cdot g"></span>Principiante</span>
+        <span class="chip"><span class="cdot a"></span>Intermedio</span>
+        <span class="chip"><span class="cdot k"></span>Avanzado</span>
+      </div>
+      <div id="entry-list"></div>
+    </div>
+    <nav class="tabbar">
+      <button class="tab on" onclick="coachTab('c-dash',this)"><span class="ico">🏟️</span>Piso</button>
+      <button class="tab" style="position:relative" onclick="coachTab('c-alerts',this)"><span class="ico">🔔</span>Alertas<span class="badge" id="alert-badge" style="display:none">1</span></button>
+    </nav>
+  </section>
+
+  <!-- ============ COACH: ALERTAS ============ -->
+  <section class="screen" id="c-alerts">
+    <div class="hdr" style="padding-top:56px">
+      <div class="brand"><span class="loop">LOOP</span><span class="sf">Modo Coach</span></div>
+      <div class="who">Alertas</div>
+    </div>
+    <div class="scroll" id="alert-list"></div>
+    <nav class="tabbar">
+      <button class="tab" onclick="coachTab('c-dash',this)"><span class="ico">🏟️</span>Piso</button>
+      <button class="tab on" style="position:relative" onclick="coachTab('c-alerts',this)"><span class="ico">🔔</span>Alertas<span class="badge" id="alert-badge2" style="display:none">1</span></button>
+    </nav>
+  </section>
+
+  <!-- ============ COACH: FICHA SOCIO ============ -->
+  <section class="screen" id="c-member">
+    <div class="hdr" style="padding-top:56px">
+      <button class="btn btn-dark btn-sm" onclick="go('c-dash')">← Piso</button>
+      <div class="who">Ficha del socio</div>
+    </div>
+    <div class="scroll">
+      <div class="card" style="display:flex;align-items:center;gap:14px">
+        <div style="width:54px;height:54px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#0a2416">V</div>
+        <div>
+          <b style="font-size:17px">Valeria, 27</b>
+          <div class="mt8" style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="chip"><span class="cdot g"></span>Principiante</span>
+            <span class="chip" id="m-mood">😮‍💨 Pilas bajas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt14" style="border-color:var(--yellow)">
+        <p class="eyebrow">Cómo recibirla hoy</p>
+        <p style="font-size:14px;line-height:1.55" id="m-tip">Llegó con pilas bajas y es su visita #3 de la semana. Salúdala <b>por su nombre</b>, reconoce que vino, y sugiérele la sesión corta. Hoy la meta es que no rompa su racha, no que haga el set completo.</p>
+      </div>
+
+      <p class="eyebrow mt28">Su contexto</p>
+      <div class="card">
+        <div class="kv"><span>Objetivo</span><b>Bajar de peso · rec. médica</b></div>
+        <div class="kv"><span>Hoy toca</span><b>Fuerza básica + cardio suave</b></div>
+        <div class="kv"><span>Racha</span><b>4 semanas 🔥</b></div>
+        <div class="kv"><span>Riesgo de abandono</span><b style="color:var(--amber)">Medio · mes 2 de 3</b></div>
+        <div class="kv"><span>Le intimida</span><b>Zona de peso libre</b></div>
+      </div>
+      <button class="btn btn-y mt20" onclick="sendKudo()">Enviar kudo 👏</button>
+      <button class="btn btn-dark mt8" onclick="markAttended()">Marcar como atendida ✓</button>
+    </div>
+  </section>
+
+  <!-- ============ MODAL: COACH LLAMADO ============ -->
+  <div class="modal-bg" id="modal-call">
+    <div class="modal">
+      <div style="text-align:center;font-size:44px">💬</div>
+      <h2 class="mt14" style="text-align:center">Le avisamos a María</h2>
+      <p class="sub mt8" style="text-align:center">Sigue en tu ejercicio: ella te encuentra en tu zona. Sin pena — para eso está. 💛</p>
+      <button class="btn btn-y mt20" onclick="closeModal()">Perfecto</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"><span id="toast-em">👋</span><span id="toast-tx"></span></div>
+</div>
+
+<script>
+/* ================= STATE ================= */
+const S = {
+  role: 'user',
+  mood: null,               // 'low' | 'ok' | 'fire'
+  checkedIn: false,
+  session: null,            // 'short' | 'full'
+  doneCount: 0,
+  totalEx: 0,
+  coachCalled: false,
+  coachComing: false,       // coach accepted the call
+  kudoPending: false,
+  lastUserScreen: 's-splash',
+  lastCoachScreen: 'c-dash',
+};
+
+const MOODS = {
+  low:  {em:'😮‍💨', label:'Pilas bajas'},
+  ok:   {em:'🙂',  label:'Normal'},
+  fire: {em:'🔥',  label:'¡A tope!'},
+};
+
+/* Preexisting people on the floor (coach view) */
+const floor = [
+  {name:'Jorge',   lvl:'k', lvlTxt:'Avanzado',    mood:'🔥', time:'9:41', note:'Autónomo. Solo si él te busca.'},
+  {name:'Mariana', lvl:'a', lvlTxt:'Intermedio',  mood:'🙂', time:'9:52', note:'Semana 1 de nuevo bloque de fuerza.'},
+  {name:'Luis',    lvl:'g', lvlTxt:'Principiante', mood:'🙂', time:'10:02', note:'Visita 5. Pregúntale cómo va con la caminadora.'},
+];
+
+/* ================= EXERCISE "GIFS" (2-frame, offline) ================= */
+/* Each exercise has two SVG frames that alternate — like a preloaded GIF. */
+const svgHead = (cx,cy)=>`<circle class="stick-head" cx="${cx}" cy="${cy}" r="8"/>`;
+
+const GIFS = {
+  squat: {
+    f1:`<svg viewBox="0 0 150 130">${svgHead(75,22)}
+        <path class="stick" d="M75 30 L75 66"/><path class="stick" d="M75 40 L62 52 M75 40 L88 52"/>
+        <circle class="stick-eq" cx="75" cy="55" r="6" fill="#8a8a92"/>
+        <path class="stick" d="M75 66 L64 95 L64 115 M75 66 L86 95 L86 115"/>
+        <path class="stick-eq" d="M40 118 L110 118"/></svg>`,
+    f2:`<svg viewBox="0 0 150 130">${svgHead(75,45)}
+        <path class="stick" d="M75 53 L75 82"/><path class="stick" d="M75 60 L60 70 M75 60 L90 70"/>
+        <circle class="stick-eq" cx="75" cy="72" r="6" fill="#8a8a92"/>
+        <path class="stick" d="M75 82 L56 92 L60 115 M75 82 L94 92 L90 115"/>
+        <path class="stick-eq" d="M40 118 L110 118"/></svg>`
+  },
+  walk: {
+    f1:`<svg viewBox="0 0 150 130">${svgHead(75,20)}
+        <path class="stick" d="M75 28 L73 64"/><path class="stick" d="M74 38 L60 54 M74 38 L90 50"/>
+        <path class="stick" d="M73 64 L58 88 L52 112 M73 64 L90 86 L98 110"/>
+        <path class="stick-eq" d="M28 118 L122 100"/></svg>`,
+    f2:`<svg viewBox="0 0 150 130">${svgHead(77,20)}
+        <path class="stick" d="M77 28 L75 64"/><path class="stick" d="M76 38 L92 54 M76 38 L62 50"/>
+        <path class="stick" d="M75 64 L92 88 L98 112 M75 64 L60 86 L52 110"/>
+        <path class="stick-eq" d="M28 118 L122 100"/></svg>`
+  },
+  press: {
+    f1:`<svg viewBox="0 0 150 130">
+        <rect class="stick-eq" x="30" y="86" width="90" height="8" rx="4" fill="#8a8a92"/>
+        ${svgHead(45,74)}<path class="stick" d="M55 78 L105 78"/>
+        <path class="stick" d="M68 78 L68 42 M92 78 L92 42"/>
+        <rect class="stick-eq" x="60" y="34" width="16" height="8" rx="3" fill="#8a8a92"/>
+        <rect class="stick-eq" x="84" y="34" width="16" height="8" rx="3" fill="#8a8a92"/>
+        <path class="stick" d="M105 78 L118 100 M105 78 L100 102"/></svg>`,
+    f2:`<svg viewBox="0 0 150 130">
+        <rect class="stick-eq" x="30" y="86" width="90" height="8" rx="4" fill="#8a8a92"/>
+        ${svgHead(45,74)}<path class="stick" d="M55 78 L105 78"/>
+        <path class="stick" d="M68 78 L62 62 M92 78 L98 62"/>
+        <rect class="stick-eq" x="54" y="54" width="16" height="8" rx="3" fill="#8a8a92"/>
+        <rect class="stick-eq" x="90" y="54" width="16" height="8" rx="3" fill="#8a8a92"/>
+        <path class="stick" d="M105 78 L118 100 M105 78 L100 102"/></svg>`
+  },
+  plank: {
+    f1:`<svg viewBox="0 0 150 130">${svgHead(34,72)}
+        <path class="stick" d="M42 78 L112 88"/>
+        <path class="stick" d="M52 80 L52 104 M112 88 L128 108"/>
+        <path class="stick-eq" d="M20 112 L134 112"/></svg>`,
+    f2:`<svg viewBox="0 0 150 130">${svgHead(34,70)}
+        <path class="stick" d="M42 76 L112 87"/>
+        <path class="stick" d="M52 78 L52 104 M112 87 L128 108"/>
+        <path class="stick-eq" d="M20 112 L134 112"/></svg>`
+  },
+  stretch: {
+    f1:`<svg viewBox="0 0 150 130">${svgHead(75,26)}
+        <path class="stick" d="M75 34 L75 74"/><path class="stick" d="M75 40 L52 24 M75 40 L98 24"/>
+        <path class="stick" d="M75 74 L62 100 L62 116 M75 74 L88 100 L88 116"/>
+        <path class="stick-eq" d="M40 118 L110 118"/></svg>`,
+    f2:`<svg viewBox="0 0 150 130">${svgHead(88,34)}
+        <path class="stick" d="M86 42 L76 76"/><path class="stick" d="M84 48 L58 40 M84 48 L108 30"/>
+        <path class="stick" d="M76 76 L63 100 L63 116 M76 76 L89 100 L89 116"/>
+        <path class="stick-eq" d="M40 118 L110 118"/></svg>`
+  },
+};
+
+/* ================= EXERCISES ================= */
+const EX = {
+  squat:  {gif:'squat',  name:'Sentadilla con peso',        easy:'Siéntate y párate de una silla imaginaria, con una pesa pegada al pecho.', sets:'3 series × 10'},
+  press:  {gif:'press',  name:'Empuje de pecho acostada',    easy:'Acostada en la banca, empuja las pesas hacia el techo.', sets:'3 series × 10'},
+  walk:   {gif:'walk',   name:'Caminata inclinada',          easy:'En la caminadora, con subida. Ritmo donde puedas platicar.', sets:'10 min · zona 2'},
+  plank:  {gif:'plank',  name:'Plancha',                     easy:'Sostén el cuerpo recto apoyada en antebrazos. Respira.', sets:'3 × 20 segundos'},
+  stretch:{gif:'stretch',name:'Estiramiento de cierre',      easy:'Brazos, espalda y piernas. Suave, sin rebotar.', sets:'5 min'},
+};
+const PLAN = { short:['squat','press','walk'], full:['squat','press','plank','walk','stretch'] };
+
+/* ================= NAV ================= */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id.startsWith('s-')) S.lastUserScreen = id; else S.lastCoachScreen = id;
+}
+function userTab(id,btn){ go(id); btn.closest('.tabbar'); }
+function coachTab(id,btn){ go(id); renderCoach(); }
+
+function setRole(r){
+  S.role = r;
+  document.getElementById('rs-user').classList.toggle('on', r==='user');
+  document.getElementById('rs-coach').classList.toggle('on', r==='coach');
+  if(r==='coach'){
+    document.getElementById('coach-badge').classList.remove('show');
+    renderCoach();
+    go(S.lastCoachScreen);
+  }else{
+    go(S.lastUserScreen);
+    if(S.coachComing && !S.coachComingToastShown){
+      S.coachComingToastShown = true;
+      toast('🧢','María va en camino a tu zona 💪');
+    }
+    if(S.kudoPending){
+      S.kudoPending = false;
+      setTimeout(()=>toast('👏','Kudo de María: "¡Qué bien verte hoy!"'), 600);
+    }
+  }
+}
+
+/* ================= SOCIO FLOW ================= */
+function checkin(){
+  S.checkedIn = true;
+  toast('✅','Acceso registrado · 10:14 a.m.');
+  setTimeout(()=>go('s-mood'), 700);
+}
+
+function setMood(m){
+  S.mood = m;
+  // adapt today's suggestion
+  const tag = document.getElementById('sess-short-tag');
+  const sub = document.getElementById('sess-short-sub');
+  const note = document.getElementById('home-note');
+  const shortCard = document.getElementById('sess-short');
+  const fullCard = document.getElementById('sess-full');
+  shortCard.classList.remove('reco'); fullCard.classList.remove('reco');
+  const oldTag = fullCard.querySelector('.tag'); if(oldTag) oldTag.remove();
+
+  if(m==='low'){
+    shortCard.classList.add('reco');
+    tag.textContent='Sugerida hoy';
+    sub.textContent='Hoy con venir ya ganaste. Te armamos una versión ligera para cuidar tu racha.';
+    note.textContent='Llegaste con pilas bajas: adaptamos tu día. Nada de todo o nada.';
+  }else if(m==='ok'){
+    shortCard.classList.add('reco');
+    tag.textContent='Buena opción';
+    sub.textContent='Lo esencial de hoy en 3 ejercicios. Si te sientes bien, súbele a la completa.';
+    note.textContent='De tu plan base semanal. Tú eliges cuánto.';
+  }else{
+    fullCard.classList.add('reco');
+    const t=document.createElement('span'); t.className='tag'; t.textContent='¡Aprovecha el ánimo!';
+    fullCard.prepend(t);
+    note.textContent='¡Vienes a tope! Buen día para la sesión completa.';
+  }
+  // notify coach module
+  document.getElementById('coach-badge').classList.add('show');
+  toast(MOODS[m].em,'Listo. María ya sabe cómo llegas hoy.');
+  setTimeout(()=>go('s-home'), 800);
+}
+
+function startWorkout(kind){
+  S.session = kind; S.doneCount = 0;
+  const list = PLAN[kind]; S.totalEx = list.length;
+  document.getElementById('wo-title').textContent = kind==='short' ? 'Sesión corta · 20 min' : 'Sesión completa · 40 min';
+  const box = document.getElementById('wo-list');
+  box.innerHTML = list.map((k,i)=>{
+    const e = EX[k], g = GIFS[e.gif];
+    return `<div class="card exo" id="exo-${i}">
+      <div class="top"><div><h3>${i+1}. ${e.name}</h3><p class="easy">${e.easy}</p></div></div>
+      <div class="gifbox"><span class="giftag">GIF precargado · sin internet</span>
+        <div class="anim"><div class="f f1">${g.f1}</div><div class="f f2">${g.f2}</div></div>
+      </div>
+      <div class="doneline">
+        <span class="chip">${e.sets}</span>
+        <button class="btn-done" onclick="doneEx(${i},this)">Marcar hecho ✓</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('wo-bar').style.width='0%';
+  go('s-workout');
+}
+
+function doneEx(i,btn){
+  const card = document.getElementById('exo-'+i);
+  if(card.classList.contains('checked')) return;
+  card.classList.add('checked');
+  btn.textContent='Hecho ✓';
+  S.doneCount++;
+  document.getElementById('wo-bar').style.width = (S.doneCount/S.totalEx*100)+'%';
+  if(S.doneCount===S.totalEx){
+    setTimeout(finishWorkout, 500);
+  }
+}
+
+function finishWorkout(){
+  document.getElementById('done-count').textContent = `${S.doneCount} de ${S.totalEx}`;
+  confetti();
+  go('s-done');
+}
+
+function finishDay(){ go('s-home'); }
+
+function callCoach(){
+  S.coachCalled = true;
+  S.coachComing = false; S.coachComingToastShown = false;
+  document.getElementById('modal-call').classList.add('show');
+  document.getElementById('coach-badge').classList.add('show');
+  updateAlertBadges();
+}
+function closeModal(){ document.getElementById('modal-call').classList.remove('show'); }
+
+/* ================= COACH RENDER ================= */
+function renderCoach(){
+  // floor list
+  const list = document.getElementById('entry-list');
+  let rows = '';
+  if(S.checkedIn){
+    const m = S.mood ? MOODS[S.mood] : {em:'❓',label:'Sin registrar'};
+    rows += `<div class="entry live" onclick="go('c-member')">
+      <span class="lvl g"></span>
+      <div class="nm"><b>Valeria <span class="pulse"></span></b>
+      <small>Principiante · ${m.label} · Riesgo mes 2 — <b style="color:var(--yellow)">salúdala por su nombre</b></small></div>
+      <span class="mood-em">${m.em}</span><span class="tm">AHORA</span>
+    </div>`;
+  }
+  rows += floor.map(p=>`<div class="entry" onclick="toast('ℹ️','Demo: ficha completa solo para Valeria')">
+      <span class="lvl ${p.lvl}"></span>
+      <div class="nm"><b>${p.name}</b><small>${p.lvlTxt} · ${p.note}</small></div>
+      <span class="mood-em">${p.mood}</span><span class="tm">${p.time}</span>
+    </div>`).join('');
+  list.innerHTML = rows;
+  document.getElementById('floor-count').textContent = 3 + (S.checkedIn?1:0);
+
+  // member sheet mood chip
+  if(S.mood){
+    const m = MOODS[S.mood];
+    document.getElementById('m-mood').textContent = `${m.em} ${m.label}`;
+    const tips = {
+      low: 'Llegó con pilas bajas y es su visita #3 de la semana. Salúdala <b>por su nombre</b>, reconoce que vino, y sugiérele la sesión corta. Hoy la meta es que no rompa su racha, no que haga el set completo.',
+      ok: 'Llegó bien y es su visita #3 de la semana. Salúdala <b>por su nombre</b> y ofrécele revisar su técnica de sentadilla: pidió apoyo con eso la semana pasada.',
+      fire:'¡Llegó a tope! Es su visita #3 de la semana. Salúdala <b>por su nombre</b> y anímala con la sesión completa. Buen día para enseñarle un ejercicio nuevo.'
+    };
+    document.getElementById('m-tip').innerHTML = tips[S.mood];
+  }
+
+  // alerts
+  const al = document.getElementById('alert-list');
+  let a = '';
+  if(S.coachCalled && !S.coachComing){
+    a += `<div class="card alertc urgent">
+      <div class="row"><span class="em">🖐</span>
+      <div style="flex:1"><b>Valeria pidió apoyo</b><small>Zona funcional · hace 1 min · Principiante, pilas bajas</small></div></div>
+      <button class="btn btn-y mt14" onclick="acceptCall()">Voy en camino →</button>
+    </div>`;
+  }
+  if(S.coachComing){
+    a += `<div class="card alertc" style="border-color:var(--green)">
+      <div class="row"><span class="em">✅</span>
+      <div><b>Apoyo a Valeria — atendido</b><small>Le avisamos que vas en camino.</small></div></div>
+    </div>`;
+  }
+  a += `<div class="card alertc">
+      <div class="row"><span class="em">📉</span>
+      <div style="flex:1"><b>Luis: 2 semanas sin venir</b><small>Su racha está por romperse. Un mensaje tuyo puede traerlo de vuelta.</small></div></div>
+      <button class="btn btn-dark btn-sm mt14" onclick="toast('📨','Mensaje enviado a Luis')">Mandar ánimo 📨</button>
+    </div>
+    <div class="card alertc">
+      <div class="row"><span class="em">🏅</span>
+      <div style="flex:1"><b>Mariana cumplió 8 semanas de racha</b><small>Buen momento para reconocerla en persona.</small></div></div>
+    </div>`;
+  al.innerHTML = a;
+  updateAlertBadges();
+}
+
+function updateAlertBadges(){
+  const n = (S.coachCalled && !S.coachComing) ? 1 : 0;
+  ['alert-badge','alert-badge2'].forEach(id=>{
+    const b = document.getElementById(id);
+    b.style.display = n ? 'flex' : 'none';
+    b.textContent = n;
+  });
+}
+
+function acceptCall(){
+  S.coachComing = true;
+  renderCoach();
+  toast('✅','Valeria sabrá que vas en camino');
+}
+
+function sendKudo(){
+  S.kudoPending = true;
+  toast('👏','Kudo enviado a Valeria');
+}
+function markAttended(){
+  toast('✓','Valeria marcada como atendida');
+  go('c-dash');
+}
+
+/* ================= HELPERS ================= */
+let toastTimer;
+function toast(em,tx){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-em').textContent = em;
+  document.getElementById('toast-tx').textContent = tx;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function confetti(){
+  const c = document.getElementById('confetti');
+  const colors = ['#FFD200','#F6F6F2','#35D07F','#4DA3FF'];
+  c.innerHTML = Array.from({length:26},(_,i)=>
+    `<i style="left:${Math.random()*100}%;background:${colors[i%4]};
+      animation-delay:${Math.random()*1.4}s;animation-duration:${2+Math.random()*1.5}s"></i>`).join('');
+}
+
+/* QR pattern */
+(function(){
+  const qr = document.getElementById('qr');
+  for(let i=0;i<81;i++){
+    const d = document.createElement('i');
+    if(Math.random()>.45) d.classList.add('on');
+    qr.insertBefore(d, qr.firstChild);
+  }
+})();
+</script>
+</body>
+</html>
