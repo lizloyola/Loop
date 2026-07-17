@@ -288,6 +288,53 @@
   .day.v{background:var(--yellow);border-color:var(--yellow);color:#111;font-weight:900}
   .day.short{background:var(--yellow-dim);border-color:var(--yellow-dim);color:#111;font-weight:900}
 
+  /* ---------- GERENTE DASHBOARD ---------- */
+  .kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+  .kpi{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:14px 12px;text-align:center;
+  }
+  .kpi .n{font-size:24px;font-weight:900;letter-spacing:-.02em}
+  .kpi .l{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:4px;line-height:1.3}
+  .kpi .d{font-size:11px;font-weight:800;margin-top:5px}
+  .d.up{color:var(--green)}.d.warn{color:var(--amber)}
+
+  .barchart{display:flex;align-items:flex-end;gap:5px;height:110px;margin-top:16px}
+  .barchart .b{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;
+    justify-content:flex-end;
+  }
+  .barchart .b i{display:block;width:100%;background:var(--card2);border-radius:5px 5px 2px 2px;min-height:4px}
+  .barchart .b.peak i{background:var(--yellow)}
+  .barchart .b span{font-size:9px;font-weight:700;color:var(--muted)}
+  .barchart .b.peak span{color:var(--yellow)}
+
+  .hbar{display:flex;align-items:center;gap:10px;margin-top:12px}
+  .hbar .em{font-size:20px;width:26px;text-align:center}
+  .hbar .track{flex:1;height:12px;background:var(--card2);border-radius:6px;overflow:hidden}
+  .hbar .track i{display:block;height:100%;border-radius:6px}
+  .hbar .pct{width:38px;text-align:right;font-size:12.5px;font-weight:800}
+
+  .split{display:flex;height:16px;border-radius:8px;overflow:hidden;margin-top:14px}
+  .split i{display:block;height:100%}
+  .splitleg{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;font-weight:700}
+
+  .crow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .crow:last-child{border:none;padding-bottom:0}
+  .crow .av{
+    width:40px;height:40px;border-radius:50%;background:var(--card2);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex:none;
+  }
+  .crow.top .av{background:var(--yellow);color:#111;border-color:var(--yellow)}
+  .crow .ci{flex:1;min-width:0}
+  .crow .ci b{font-size:14.5px;display:flex;align-items:center;gap:6px}
+  .crow .ci small{color:var(--muted);font-size:11.5px;display:block;margin-top:3px}
+  .crow .score{font-size:15px;font-weight:900;color:var(--yellow)}
+
+  .insight{
+    border:1.5px solid var(--yellow);background:linear-gradient(180deg,#26240f,var(--card));
+  }
+
   /* ---------- MODALS / TOAST ---------- */
   .modal-bg{
     position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:20;
@@ -319,8 +366,9 @@
   .roleswitch button{
     position:relative;
     border:none;background:transparent;color:var(--muted);font-family:inherit;
-    font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-    padding:7px 14px;border-radius:999px;cursor:pointer;
+    font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    padding:6px 10px;border-radius:999px;cursor:pointer;
+    line-height:1.2;white-space:nowrap;display:flex;align-items:center;gap:4px;
   }
   .roleswitch button.on{background:var(--yellow);color:#111}
   .roleswitch .rbadge{
@@ -359,6 +407,7 @@
     <button id="rs-coach" onclick="setRole('coach')">📋 Coach
       <span class="rbadge" id="coach-badge">1</span>
     </button>
+    <button id="rs-mgr" onclick="setRole('mgr')">📊 Gerente</button>
   </div>
 
   <!-- ============ SOCIO: SPLASH ============ -->
@@ -649,6 +698,99 @@
     </div>
   </section>
 
+  <!-- ============ GERENTE: DASHBOARD ============ -->
+  <section class="screen" id="g-dash">
+    <div class="hdr" style="padding-top:56px">
+      <div class="brand"><span class="loop">LOOP</span><span class="sf">Modo Gerente</span></div>
+      <div class="who">Suc. Satélite</div>
+    </div>
+    <div class="scroll" style="padding-bottom:40px">
+      <h2>Hoy de un vistazo</h2>
+      <p class="sub">Jueves · corte 10:15 a.m.</p>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="n" id="g-att">127</div>
+          <div class="l">Visitas hoy</div>
+          <div class="d up">▲ 9% vs jueves típico</div>
+        </div>
+        <div class="kpi">
+          <div class="n">68%</div>
+          <div class="l">Socios con racha viva</div>
+          <div class="d up">▲ 5 pts este mes</div>
+        </div>
+        <div class="kpi">
+          <div class="n">14</div>
+          <div class="l">En riesgo (mes 1–3)</div>
+          <div class="d warn">● Coaches avisados</div>
+        </div>
+      </div>
+
+      <div class="card mt14 insight">
+        <p class="eyebrow">Insight del día</p>
+        <p style="font-size:14px;line-height:1.55">De los 14 socios en riesgo, <b>9 ya recibieron un mensaje de su coach</b> esta semana. Los que reciben seguimiento vuelven 2× más.</p>
+      </div>
+
+      <p class="eyebrow mt28">Horas pico</p>
+      <div class="card">
+        <div class="barchart">
+          <div class="b"><i style="height:22%"></i><span>6</span></div>
+          <div class="b"><i style="height:45%"></i><span>8</span></div>
+          <div class="b"><i style="height:32%"></i><span>10</span></div>
+          <div class="b"><i style="height:20%"></i><span>12</span></div>
+          <div class="b"><i style="height:26%"></i><span>14</span></div>
+          <div class="b"><i style="height:40%"></i><span>16</span></div>
+          <div class="b peak"><i style="height:88%"></i><span>18</span></div>
+          <div class="b peak"><i style="height:100%"></i><span>19</span></div>
+          <div class="b peak"><i style="height:78%"></i><span>20</span></div>
+          <div class="b"><i style="height:34%"></i><span>21</span></div>
+        </div>
+        <p class="sub mt14" style="font-size:12.5px">Pico de 6 a 8 pm. Sugerencia: <b style="color:var(--text)">un coach extra en piso</b> en esa franja — ahí se concentran los principiantes que salen de trabajar.</p>
+      </div>
+
+      <p class="eyebrow mt28">Clima de hoy</p>
+      <div class="card">
+        <div class="hbar"><span class="em">🔥</span><div class="track"><i style="width:34%;background:var(--yellow)"></i></div><span class="pct">34%</span></div>
+        <div class="hbar"><span class="em">🙂</span><div class="track"><i style="width:48%;background:#6f6f78"></i></div><span class="pct">48%</span></div>
+        <div class="hbar"><span class="em">😮‍💨</span><div class="track"><i style="width:18%;background:var(--blue)"></i></div><span class="pct">18%</span></div>
+        <p class="sub mt14" style="font-size:12.5px">Cómo llega la gente al check-in. Si "pilas bajas" sube sostenido, es señal temprana de churn — hoy está en rango normal.</p>
+      </div>
+
+      <p class="eyebrow mt28">Sesiones de hoy</p>
+      <div class="card">
+        <div class="split">
+          <i style="width:58%;background:var(--yellow)"></i>
+          <i style="width:42%;background:var(--card2)"></i>
+        </div>
+        <div class="splitleg">
+          <span style="color:var(--yellow)">Cortas · 58%</span>
+          <span style="color:var(--muted)">Completas · 42%</span>
+        </div>
+        <p class="sub mt14" style="font-size:12.5px">Las cortas no son mala señal: <b style="color:var(--text)">son rachas que se salvan</b>. El 71% ocurre en días de pilas bajas.</p>
+      </div>
+
+      <p class="eyebrow mt28">Coaches</p>
+      <div class="card">
+        <div class="crow top">
+          <div class="av">M</div>
+          <div class="ci"><b>María ⭐</b><small>12 atendidos · 8 kudos · responde en 2 min</small></div>
+          <div class="score">9.4</div>
+        </div>
+        <div class="crow">
+          <div class="av">C</div>
+          <div class="ci"><b>Carlos</b><small>9 atendidos · 5 kudos · responde en 4 min</small></div>
+          <div class="score">8.1</div>
+        </div>
+        <div class="crow">
+          <div class="av">A</div>
+          <div class="ci"><b>Ana</b><small>7 atendidos · 2 kudos · responde en 7 min</small></div>
+          <div class="score">6.8</div>
+        </div>
+        <p class="sub mt14" style="font-size:12.5px">Score de acompañamiento: atenciones + kudos + velocidad de respuesta. Mide <b style="color:var(--text)">conexión con socios</b>, no ventas.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ MODAL: COACH LLAMADO ============ -->
   <div class="modal-bg" id="modal-call">
     <div class="modal">
@@ -770,7 +912,8 @@ const PLAN = { short:['squat','press','walk'], full:['squat','press','plank','wa
 function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if(id.startsWith('s-')) S.lastUserScreen = id; else S.lastCoachScreen = id;
+  if(id.startsWith('s-')) S.lastUserScreen = id;
+  else if(id.startsWith('c-')) S.lastCoachScreen = id;
 }
 function userTab(id,btn){ go(id); btn.closest('.tabbar'); }
 function coachTab(id,btn){ go(id); renderCoach(); }
@@ -779,6 +922,12 @@ function setRole(r){
   S.role = r;
   document.getElementById('rs-user').classList.toggle('on', r==='user');
   document.getElementById('rs-coach').classList.toggle('on', r==='coach');
+  document.getElementById('rs-mgr').classList.toggle('on', r==='mgr');
+  if(r==='mgr'){
+    document.getElementById('g-att').textContent = 127 + (S.checkedIn?1:0);
+    go('g-dash');
+    return;
+  }
   if(r==='coach'){
     document.getElementById('coach-badge').classList.remove('show');
     renderCoach();
